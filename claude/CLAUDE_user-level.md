@@ -27,19 +27,8 @@ Specifically:
 
 When a task spans multiple roles, follow `agents/playbooks/lead.orchestration.md` to coordinate them rather than picking one role arbitrarily.
 
-## Git: commit frequently, small logical units
+## Git workflow
 
-When working in a git repo, commit early and often. Each commit should be one logical change — small enough to describe in a single sentence without "and".
+When working in a git repository, read `~/.claude/git-workflow.md` and follow it. It covers worktrees, PRs (default for repos with a GitHub remote; solo repos opt out in their project `CLAUDE.md`), merge style, push cadence, Conventional Commits, cleanup, and commit discipline.
 
-**Commit when:**
-- A discrete piece of work is complete and the tree is in a coherent state (tests pass, file compiles, doc section is finished) — don't wait for the whole task.
-- You're about to switch contexts (different file area, different concern, refactor → feature, code → docs).
-- Before starting a risky or speculative change, so there's a clean point to return to.
-- After deleting or moving files, as its own commit — keep renames/deletions separate from edits so diffs stay readable.
-
-**Don't:**
-- Batch unrelated changes into one commit ("fix X and also Y and update Z").
-- Hold work uncommitted across multiple turns waiting for "the right moment" — the right moment is now.
-- Amend or force-push to share history without explicit ask.
-
-Default to asking only if a commit would mix concerns or the boundary is unclear; otherwise just commit.
+Project-level `CLAUDE.md` files may override specific rules from that doc; where they do, the project rule wins.

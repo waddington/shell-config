@@ -7,6 +7,7 @@ Tracked copies of my user-global Claude Code configuration. The live files live 
 | Tracked file / dir              | Lives at                                  |
 | ------------------------------- | ----------------------------------------- |
 | `CLAUDE_user-level.md`          | `~/.claude/CLAUDE.md`                     |
+| `git-workflow.md`               | `~/.claude/git-workflow.md`               |
 | `settings_user-level.json`      | `~/.claude/settings.json`                 |
 | `statusline-command.sh`         | `~/.claude/statusline-command.sh`         |
 | `skills/agent-team/`            | `~/.claude/skills/agent-team/`            |

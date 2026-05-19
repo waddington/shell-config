@@ -10,6 +10,7 @@ DEST_DIR="${HOME}/.claude"
 # Mapping: "<src relative to SRC_DIR>::<dest relative to DEST_DIR>"
 MAPPINGS=(
   "CLAUDE_user-level.md::CLAUDE.md"
+  "git-workflow.md::git-workflow.md"
   "settings_user-level.json::settings.json"
   "statusline-command.sh::statusline-command.sh"
   "skills/agent-team::skills/agent-team"
