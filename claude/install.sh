@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Install tracked Claude Code config from this repo into ~/.claude/.
-# Fails if any destination already exists — never overwrites.
+# Per-mapping: copy if the destination doesn't exist; skip with a notice if it does.
+# Never overwrites; missing source files are still fatal.
 
 set -euo pipefail
 
@@ -16,45 +17,55 @@ MAPPINGS=(
   "skills/agent-team::skills/agent-team"
 )
 
-# Pre-flight: refuse if any destination already exists.
-clash=0
+# Pre-flight: every source must exist.
+missing=0
 for entry in "${MAPPINGS[@]}"; do
   src="${SRC_DIR}/${entry%%::*}"
-  dst="${DEST_DIR}/${entry##*::}"
   if [[ ! -e "$src" ]]; then
     echo "ERROR: source missing: $src" >&2
-    clash=1
-    continue
-  fi
-  if [[ -e "$dst" || -L "$dst" ]]; then
-    echo "ERROR: destination already exists: $dst" >&2
-    clash=1
+    missing=1
   fi
 done
-if [[ "$clash" -ne 0 ]]; then
+if [[ "$missing" -ne 0 ]]; then
   echo >&2
-  echo "Aborting — no files were copied. Remove or back up the clashing destinations and re-run." >&2
+  echo "Aborting — fix the missing sources and re-run." >&2
   exit 1
 fi
 
 mkdir -p "${DEST_DIR}/skills"
 
+# Mode fixups to apply only when WE created the destination this run.
+# Keyed by destination name (relative to DEST_DIR).
+declare -A MODE_FIXUPS=(
+  ["statusline-command.sh"]="+x"
+  ["settings.json"]="600"
+)
+
+copied=0
+skipped=0
 for entry in "${MAPPINGS[@]}"; do
   src="${SRC_DIR}/${entry%%::*}"
-  dst="${DEST_DIR}/${entry##*::}"
+  dst_rel="${entry##*::}"
+  dst="${DEST_DIR}/${dst_rel}"
+  if [[ -e "$dst" || -L "$dst" ]]; then
+    echo "skip: $dst already exists"
+    skipped=$((skipped + 1))
+    continue
+  fi
   echo "copy: $src -> $dst"
   if [[ -d "$src" ]]; then
     cp -r "$src" "$dst"
   else
     cp "$src" "$dst"
   fi
+  if [[ -n "${MODE_FIXUPS[$dst_rel]+set}" ]]; then
+    chmod "${MODE_FIXUPS[$dst_rel]}" "$dst"
+  fi
+  copied=$((copied + 1))
 done
 
-# Preserve executable bit on the statusline script.
-chmod +x "${DEST_DIR}/statusline-command.sh"
-
-# settings.json is mode 0600 in the live tree; mirror that for the secret-adjacent allowlist.
-chmod 600 "${DEST_DIR}/settings.json"
-
 echo
-echo "Done."
+echo "Done. copied=${copied} skipped=${skipped}"
+if [[ "$skipped" -gt 0 ]]; then
+  echo "To re-install a skipped item, remove or back up its destination and re-run."
+fi

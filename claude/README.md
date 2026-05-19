@@ -29,4 +29,4 @@ From the repo root:
 ./claude/install.sh
 ```
 
-The script copies each tracked file to its `~/.claude/` destination and **fails loudly if anything already exists there** — it never overwrites. If you want to re-sync after editing this repo, remove the destination file first (or back it up), then re-run.
+The script is per-mapping idempotent: it copies each tracked file to its `~/.claude/` destination, and **skips any destination that already exists** — it never overwrites. Re-running after this repo gains a new tracked file installs just the new one. To re-sync an existing destination, remove or back it up first, then re-run.
