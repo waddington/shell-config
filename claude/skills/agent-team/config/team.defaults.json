@@ -1,0 +1,155 @@
+{
+  "$schema": "config/team.defaults.schema.json",
+  "schema_version": "1.0.0",
+  "team_name": "card-in-wallet-engineering",
+  "default_subagent_model": "opusplan",
+
+  "concurrency_limits": {
+    "description": "Maximum concurrent agents per role. Enforced by Lead on spawn.",
+    "lead": 1,
+    "architect.principal": 1,
+    "implementer.backend": 5,
+    "implementer.frontend": 4,
+    "implementer.platform": 3,
+    "reviewer.security": 3,
+    "reviewer.correctness": 3,
+    "reviewer.tests": 3,
+    "reviewer.quality": 3,
+    "reviewer.standards": 3,
+    "reviewer.logic": 3,
+    "reviewer.risk": 3,
+    "reviewer.pr-description": 3,
+    "security.threat-modeler": 1,
+    "security.appsec-analyst": 1,
+    "qa.test-designer": 1,
+    "qa.test-writer": 5,
+    "debugger": 3,
+    "product.pm": 1,
+    "prioritiser": 1,
+    "perf.reliability": 2,
+    "observability": 2,
+    "generalist": 8,
+    "total_max": 46
+  },
+
+  "iteration_limits": {
+    "description": "Bounds on iteration scope to prevent unbounded expansion.",
+    "max_tasks_per_iteration": 50,
+    "max_proposals_per_agent_per_iteration": 5,
+    "max_review_cycles_per_task": 10,
+    "max_concurrent_tasks_per_agent": 3,
+    "max_review_to_in_progress_loops": 5
+  },
+
+  "spawn_policy": {
+    "description": "Rules governing agent spawning and termination.",
+    "minimum_viable_team": [
+      "lead",
+      "implementer.backend",
+      "reviewer.correctness",
+      "reviewer.tests"
+    ],
+    "idle_timeout_cycles": 2,
+    "require_task_before_spawn": true,
+    "allow_speculative_spawn": false
+  },
+
+  "review_policy": {
+    "description": "Review process configuration.",
+    "require_all_gates": true,
+    "allow_self_review": false,
+    "max_active_reviews_per_reviewer": 5,
+    "re_review_scoped_to_findings": true,
+    "review_cycle_escalation_threshold": 3
+  },
+
+  "messaging": {
+    "description": "Messaging system configuration.",
+    "max_inbox_size": 20,
+    "stale_message_threshold_cycles": 1,
+    "enforce_one_intent_per_message": true,
+    "enforce_structured_format": true,
+    "allow_broadcast": "sev0_security_only"
+  },
+
+  "severity_response": {
+    "description": "Required response behavior per severity level.",
+    "sev0": {
+      "response": "immediate",
+      "pause_other_work": true,
+      "notify_human": true,
+      "broadcast_permitted": true,
+      "rollback_authorized": true,
+      "merge_restriction": "all_blocked",
+      "incident_report": "full"
+    },
+    "sev1": {
+      "response": "prioritized",
+      "pause_other_work": false,
+      "notify_human": "if_exceeds_one_iteration",
+      "broadcast_permitted": false,
+      "rollback_authorized": false,
+      "merge_restriction": "affected_area_blocked",
+      "incident_report": "abbreviated"
+    },
+    "sev2": {
+      "response": "current_or_next_iteration",
+      "pause_other_work": false,
+      "notify_human": false,
+      "broadcast_permitted": false,
+      "rollback_authorized": false,
+      "merge_restriction": "affected_pr_if_must_fix",
+      "incident_report": "task_tracking"
+    },
+    "sev3": {
+      "response": "when_capacity_allows",
+      "pause_other_work": false,
+      "notify_human": false,
+      "broadcast_permitted": false,
+      "rollback_authorized": false,
+      "merge_restriction": "none",
+      "incident_report": "none"
+    }
+  },
+
+  "task_lifecycle": {
+    "description": "Task lifecycle configuration.",
+    "states": [
+      "PROPOSED",
+      "ACCEPTED",
+      "ASSIGNED",
+      "IN_PROGRESS",
+      "IN_REVIEW",
+      "CHANGES_REQUESTED",
+      "APPROVED",
+      "DONE",
+      "REJECTED",
+      "BLOCKED",
+      "CANCELLED"
+    ],
+    "terminal_states": ["DONE", "REJECTED", "CANCELLED"],
+    "hooks": {}
+  },
+
+  "priority_levels": {
+    "P0": "Critical — must be done immediately, blocks everything",
+    "P1": "High — current iteration, high priority",
+    "P2": "Medium — current or next iteration",
+    "P3": "Low — backlog, address when capacity allows"
+  },
+
+  "coverage_thresholds": {
+    "description": "Minimum test coverage requirements.",
+    "new_code_line_coverage_pct": 80,
+    "critical_path_branch_coverage_pct": 90,
+    "security_sensitive_branch_coverage_pct": 100
+  },
+
+  "performance_budgets": {
+    "description": "Default performance budgets. Override per-endpoint where needed.",
+    "api_read_p95_ms": 200,
+    "api_write_p95_ms": 500,
+    "db_query_p95_ms": 50,
+    "frontend_bundle_delta_kb": 10
+  }
+}
