@@ -12,7 +12,7 @@ Tracked copies of my user-global Claude Code configuration. The live files live 
 | `statusline-command.sh`         | `~/.claude/statusline-command.sh`         |
 | `skills/agent-team/`            | `~/.claude/skills/agent-team/`            |
 
-`settings.json` references `statusline-command.sh` by absolute path (`/home/kai/.claude/statusline-command.sh`), so the script must land there for the statusline to work.
+`settings.json` references `statusline-command.sh` via `~/.claude/statusline-command.sh`, so the script must land in `~/.claude/` for the statusline to render. The tilde is expanded by Claude Code, so the config is portable across machines and usernames (Linux + macOS).
 
 ## What's intentionally NOT tracked
 
@@ -23,6 +23,17 @@ Tracked copies of my user-global Claude Code configuration. The live files live 
 
 ## Restoring onto a fresh machine
 
+### Requirements
+
+- `bash` (already present on Linux + macOS)
+- `jq` — needed by `statusline-command.sh` to parse Claude Code's JSON input. Without it the statusline renders empty/zero fields.
+  - macOS: `brew install jq`
+  - Debian/Ubuntu: `sudo apt install jq`
+  - Fedora: `sudo dnf install jq`
+- `git` (Claude Code installs it as a dep, but worth confirming)
+
+### Install
+
 From the repo root:
 
 ```sh
@@ -30,3 +41,13 @@ From the repo root:
 ```
 
 The script is per-mapping idempotent: it copies each tracked file to its `~/.claude/` destination, and **skips any destination that already exists** — it never overwrites. Re-running after this repo gains a new tracked file installs just the new one. To re-sync an existing destination, remove or back it up first, then re-run.
+
+After it finishes the script prints warnings if (a) `~/.claude/settings.json` was skipped (so the statusline / permission allowlist from this repo isn't active), or (b) `jq` isn't on PATH.
+
+### Merging settings.json
+
+If `~/.claude/settings.json` already exists, install.sh skips it — your live file is untouched. To pick up the tracked statusLine pointer and permission allowlist, diff and merge by hand:
+
+```sh
+diff ~/.claude/settings.json claude/settings_user-level.json
+```

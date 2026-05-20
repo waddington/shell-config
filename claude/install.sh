@@ -43,6 +43,7 @@ declare -A MODE_FIXUPS=(
 
 copied=0
 skipped=0
+settings_skipped=0
 for entry in "${MAPPINGS[@]}"; do
   src="${SRC_DIR}/${entry%%::*}"
   dst_rel="${entry##*::}"
@@ -50,6 +51,9 @@ for entry in "${MAPPINGS[@]}"; do
   if [[ -e "$dst" || -L "$dst" ]]; then
     echo "skip: $dst already exists"
     skipped=$((skipped + 1))
+    if [[ "$dst_rel" == "settings.json" ]]; then
+      settings_skipped=1
+    fi
     continue
   fi
   echo "copy: $src -> $dst"
@@ -68,4 +72,30 @@ echo
 echo "Done. copied=${copied} skipped=${skipped}"
 if [[ "$skipped" -gt 0 ]]; then
   echo "To re-install a skipped item, remove or back up its destination and re-run."
+fi
+
+# Post-install checks (warnings, not failures).
+post_warnings=0
+
+if [[ "$settings_skipped" -eq 1 ]]; then
+  echo
+  echo "WARNING: ${DEST_DIR}/settings.json was skipped — your existing settings file is unchanged."
+  echo "  The tracked copy carries the statusLine pointer + permission allowlist;"
+  echo "  if you want those, diff the two and merge by hand:"
+  echo "    diff ${DEST_DIR}/settings.json ${SRC_DIR}/settings_user-level.json"
+  post_warnings=$((post_warnings + 1))
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo
+  echo "WARNING: 'jq' is not installed. The statusline script needs it to parse Claude Code's"
+  echo "  JSON input. Without jq it will render empty/zero fields."
+  echo "  Install: brew install jq   (macOS)"
+  echo "           apt install jq    (Debian/Ubuntu)"
+  echo "           dnf install jq    (Fedora)"
+  post_warnings=$((post_warnings + 1))
+fi
+
+if [[ "$post_warnings" -eq 0 ]]; then
+  echo "All checks passed."
 fi
